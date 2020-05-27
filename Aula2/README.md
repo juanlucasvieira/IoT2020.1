@@ -34,4 +34,4 @@ Para executar o **cliente**, abra o terminal no diretório Aula2 e digite o coma
 
 ## Exemplo de Execução
 
-![screenshot](https://github.com/juanlucasvieira/IoT2020.1/blob/master/Aula2/screenshot.png)
+![screenshot](https://github.com/juanlucasvieira/IoT2020.1/blob/master/Aula2/example.gif)

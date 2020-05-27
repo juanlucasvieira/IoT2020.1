@@ -31,3 +31,7 @@ Para executar o **cliente**, abra o terminal no diretório Aula2 e digite o coma
 ```python coap_client.py -a <ip_servidor> -t <limiar_temperatura> -p <limiar_pressão>```
 
 **Exemplo**: ```python coap_client.py -a localhost -t 25 -p 500```
+
+## Exemplo de Execução
+
+![screenshot](https://github.com/juanlucasvieira/IoT2020.1/blob/master/Aula2/example.gif)

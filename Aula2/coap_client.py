@@ -22,7 +22,9 @@ def usage(): # Display usage message
     print "\t-t, --temperature=\tSet the temperature threshold"
     print "\t-p, --pressure=\t\tSet the pressure threshold"
 
-def observe_callback(response): # Callback function for Sensor Resource observation
+# Callback function for Threshold Resource observation
+# This function is called when the CoAP Server notify a modification in the Threshold Resource
+def observe_callback(response):
     if response and response.payload and "temp=" in response.payload:
         data = response.payload.split(",")
         received_temp = float(data[0].replace("temp=",""))
@@ -31,6 +33,7 @@ def observe_callback(response): # Callback function for Sensor Resource observat
             print "THRESHOLD CHANGED! Temperature:",received_temp,"Pressure:",received_press
             print "Overwrite the actual threshold with your threshold? [Type OVERWRITE] - ACTUAL: "+ str(received_temp)+ " C / " + str(received_press) + " mbar -> YOUR: "+ str(temp_thres)+ " C / " + str(press_thres) + " mbar"
 
+# This function sends the temperature and pressure threshold to the CoAP Server
 def send_threshold(client, path, temp_thres, press_thres):
     answer = client.put(path, "temp="+str(temp_thres)+",press="+str(press_thres), timeout=1)
     if answer and answer.code == defines.Codes.CHANGED.number:
@@ -107,20 +110,20 @@ def main():
     print "Specified Pressure Threshold:", press_thres
     
     try:
-        reply = send_threshold(client, path, temp_thres, press_thres)
-        client.observe(path, observe_callback)
+        reply = send_threshold(client, path, temp_thres, press_thres) # Send Threshold to Server
+        client.observe(path, observe_callback) # Observe Threshold Resource modifications
         print "Observing Threshold..."
         print "Press Ctrl+C to exit client."
         while 1: # Loop until Ctrl+C is pressed.
             value = raw_input("")
-            if value and "overwrite" in value.lower():
-                reply = send_threshold(client, path, temp_thres, press_thres)
-    except KeyboardInterrupt:
+            if value and "overwrite" in value.lower(): # If User wants to overwrite the Threshold stored in the Server with Client's Threshold
+                reply = send_threshold(client, path, temp_thres, press_thres) # Send Client's threshold again
+    except KeyboardInterrupt: # If Ctrl+C is pressed:
         print "Cancelling observing..."
         if reply is not None:
-            client.cancel_observing(reply, True)
+            client.cancel_observing(reply, True) # Cancel Resource Observation
         print "Stopping Client..."
-        client.close()
+        client.close() # Stop Client
         print "Stopped."
 
 

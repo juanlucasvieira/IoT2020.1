@@ -7,26 +7,20 @@ import time
 
 # Author: Juan Lucas Vieira
 
-sense = SenseHat()
+sense = SenseHat() # Instantiate SenseHat Emulator
 red = (255,0,0) # Instantiate RED pixel
-black = (0,0,0) # Instantiate OFF pixel
 
 class ThresholdResource(Resource):
-    
-    occupiedLeds = [] # List containing IDs of LEDs being used by clients
     
     def __init__(self, name="ThresholdResource", coap_server=None):
         super(ThresholdResource, self).__init__(name, coap_server, visible=True,
                                             observable=True, allow_children=True)
         self.payload = "temp=1000,press=10000"
 
-    def render_GET(self, request):
+    def render_GET(self, request): # Returns the threshold information
         return self
 
-    def render_PUT(self, request): # Called when a client wants to turn ON or OFF the LED allocated to him.
-        #threshold = request.uri_path.split(",")
-        #temp = int(threshold[0].replace("temp=",""))
-        #pressure = int(threshold[1].replace("press=",""))
+    def render_PUT(self, request): # Called when a client wants to specify the threshold.
         self.payload = request.payload
         print "NEW THRESHOLD:",self.payload
         return self
@@ -36,26 +30,25 @@ class CoAPServer(CoAP):
         CoAP.__init__(self, (host, port))
         global threshRes
         threshRes = ThresholdResource()
-        self.add_resource('threshold/', threshRes)
+        self.add_resource('threshold/', threshRes) # Adds /threshold resource to the CoAP Server
         
-def checkValues():
-    #lastTemp = -100
-    #lastPress = -100
+# Checks whether the temperature and pressure reported by the sensor are above the Threshold
+def checkValues(): 
     while run:
         threshold = threshRes.payload.split(",")
-        tempThreshold = float(threshold[0].replace("temp=",""))
-        pressureThreshold = float(threshold[1].replace("press=",""))
-        # Check if Temp. or Pressure has changed, ignoring small changes to avoid sending sensors noise.
-        if (getTemperature() > tempThreshold and getPressure() > pressureThreshold): 
-            sense.clear(red)
-            #server.notify(threshRes) # Notify observers when Temperature or Pressure has changed.
+        tempThreshold = float(threshold[0].replace("temp=","")) # Get temperature of the Threshold resource
+        pressureThreshold = float(threshold[1].replace("press=","")) # Get pressure of the Threshold resource
+        if (getTemperature() > tempThreshold and getPressure() > pressureThreshold): # Sensor Temperature and Pressure > Threshold ?
+            sense.clear(red) # Set LEDs red if above threshold
         else:
-            sense.clear()
+            sense.clear() # Turn of LEDs
         time.sleep(.5) # Reduce verification rate to every 500 milliseconds. 
 
+# Get Sensor's Temperature
 def getTemperature():
     return float(sense.temperature)
 
+# Get Sensor's Pressure
 def getPressure():
     return float(sense.pressure)
 
@@ -66,16 +59,16 @@ def main():
 
     server = CoAPServer("0.0.0.0",5683)
     
-    checkValuesTask = Thread(target = checkValues) # Create thread to check Sensor Temp./Pressure values
-    checkValuesTask.start()
+    checkValuesTask = Thread(target = checkValues) # Create thread to check Sensor Temperature/Pressure values
+    checkValuesTask.start() # Start Thread
     try:
         print "Server Started"
         server.listen(10) # Start listening for incoming messages
     except KeyboardInterrupt: # Shutdown server when Ctrl+C is pressed
         print "Stopping Server..."
         run = False
-        server.close()
-        sense.clear()
+        server.close() # Stop Server
+        sense.clear() # Turn off LEDs
         print "Stopped."
 
 if __name__ == '__main__':

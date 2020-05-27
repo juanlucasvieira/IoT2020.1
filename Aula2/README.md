@@ -11,7 +11,7 @@
   - Esses limiares serão **enviados** ao Servidor CoAP, através de uma mensagem PUT /threshold.
   - O Cliente também irá enviar uma requisição para **observar** mudanças no recurso threshold.
   - Quando uma notificação de modificação do Threshold - *por outro cliente* - for recebida, o cliente exibe os novos valores de Limiar.
-  - O usuário pode optar por sobrescrever o Limiar ao entrar no teclado o comando **OVERWRITE**.
+  - O usuário pode optar por sobrescrever o Limiar presente no servidor ao digitar no teclado o comando **OVERWRITE**.
 * O **Servidor CoAP**, expõe o recurso Threshold, que armazena um limiar de temperatura e pressão.
   - Sempre que o valor do recurso Threshold é alterado, o servidor **notifica** clientes que estão observando o recurso. 
   - O servidor recebe os valores de temperatura e pressão reportados pelo sensor SenseHat.
